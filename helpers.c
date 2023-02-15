@@ -141,6 +141,144 @@ void blur(int height, int width, RGBTRIPLE image[height][width])
     return;
 }
 
+// Detect edges
+void edges(int height, int width, RGBTRIPLE image[height][width])
+{
+    // Create variables
+    int Gxr, Gyr, Gxg, Gyg, Gxb, Gyb, mini, minj, maxi, maxj;
+
+    // Create a copy of the image array
+    RGBTRIPLE copy[height][width];
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            copy[i][j] = image[i][j];
+        }
+    }
+
+    // Go through the image
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            // Set the variables
+            Gxr = 0;
+            Gyr = 0;
+            Gxg = 0;
+            Gyg = 0;
+            Gxb = 0;
+            Gyb = 0;
+            mini = i - 1;
+            minj = j - 1;
+            maxi = i + 1;
+            maxj = j + 1;
+
+            // Check if edge or corner
+            if (i == 0)
+            {
+                mini = 0;
+            }
+            else if (i == height - 1)
+            {
+                maxi = height - 1;
+            }
+            if (j == 0)
+            {
+                minj = 0;
+            }
+            else if (j == width - 1)
+            {
+                maxj = width - 1;
+            }
+
+            // Calculate Gx
+            for (int k = mini; k <= maxi; k++)
+            {
+                // Check if it is the middle
+                if (k == i)
+                {
+                    // Checking for borders
+                    if (j - 1 >= 0)
+                    {
+                        Gxr += -2 * copy[k][j - 1].rgbtRed;
+                        Gxg += -2 * copy[k][j - 1].rgbtGreen;
+                        Gxb += -2 * copy[k][j - 1].rgbtBlue;
+                    }
+                    if (j + 1 < width)
+                    {
+                        Gxr += 2 * copy[k][j + 1].rgbtRed;
+                        Gxg += 2 * copy[k][j + 1].rgbtGreen;
+                        Gxb += 2 * copy[k][j + 1].rgbtBlue;
+                    }
+                }
+                else
+                {
+                    // Checking for borders
+                    if (j - 1 >= 0)
+                    {
+                        Gxr += -1 * copy[k][j - 1].rgbtRed;
+                        Gxg += -1 * copy[k][j - 1].rgbtGreen;
+                        Gxb += -1 * copy[k][j - 1].rgbtBlue;
+                    }
+                    if (j + 1 < width)
+                    {
+                        Gxr += copy[k][j + 1].rgbtRed;
+                        Gxg += copy[k][j + 1].rgbtGreen;
+                        Gxb += copy[k][j + 1].rgbtBlue;
+                    }
+                }
+            }
+
+            // Calculate Gy
+            for (int k = minj; k <= maxj; k++)
+            {
+                // Check if it is the middle
+                if (k == j)
+                {
+                    // Checking for borders
+                    if (i - 1 >= 0)
+                    {
+                        Gyr += -2 * copy[i - 1][k].rgbtRed;
+                        Gyg += -2 * copy[i - 1][k].rgbtGreen;
+                        Gyb += -2 * copy[i - 1][k].rgbtBlue;
+                    }
+                    if (i + 1 < height)
+                    {
+                        Gyr += 2 * copy[i + 1][k].rgbtRed;
+                        Gyg += 2 * copy[i + 1][k].rgbtGreen;
+                        Gyb += 2 * copy[i + 1][k].rgbtBlue;
+                    }
+                }
+                else
+                {
+                    // Checking for borders
+                    if (i - 1 >= 0)
+                    {
+                        Gyr += -1 * copy[i - 1][k].rgbtRed;
+                        Gyg += -1 * copy[i - 1][k].rgbtGreen;
+                        Gyb += -1 * copy[i - 1][k].rgbtBlue;
+                    }
+                    if (i + 1 < height)
+                    {
+                        Gyr += copy[i + 1][k].rgbtRed;
+                        Gyg += copy[i + 1][k].rgbtGreen;
+                        Gyb += copy[i + 1][k].rgbtBlue;
+                    }
+                }
+            }
+
+            // Calculate new pixel values
+            image[i][j].rgbtRed = minint255(round(sqrt(pow(Gxr, 2) + pow(Gyr, 2))));
+            image[i][j].rgbtGreen = minint255(round(sqrt(pow(Gxg, 2) + pow(Gyg, 2))));
+            image[i][j].rgbtBlue = minint255(round(sqrt(pow(Gxb, 2) + pow(Gyb, 2))));
+
+        }
+    }
+
+    return;
+}
+
 // Return the given number if it is smaller than 255, else return 255
 int minint255(int a)
 {
